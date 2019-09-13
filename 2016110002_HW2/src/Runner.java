@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -57,6 +58,7 @@ public class Runner {
 		for(ArrayList<Double> e: sortedInters) {
 			System.out.println(e);
 		}
+		// convert Double to Integer if coordinate is integer
 	}
 	public static int[][] getCombisIdx(int pointSize){
 		int r = 3;
@@ -72,16 +74,16 @@ public class Runner {
 		int combisIdx = 0;
 		
 		for(int i = 0; i < n-r+1; i++) {
-			int secondIdx = i+1;
-			for(int j = secondIdx+1; j < n; j++) {
-				int [] combi = new int[r];
-				combi[0] = indice[i];
-				combi[1] = indice[secondIdx];
-				combi[2] = indice[j];
-				combis[combisIdx] = combi;
-				combisIdx += 1;
+			for(int j = i+1; j < n-r+2; j++) {
+				for(int k = j+1; k < n; k++) {
+					int [] combi = new int[r];
+					combi[0] = indice[i];
+					combi[1] = indice[j];
+					combi[2] = indice[k];
+					combis[combisIdx] = combi;
+					combisIdx += 1;
+				}
 			}
-			secondIdx += 1;
 		}
 		
 		return combis;
@@ -92,7 +94,7 @@ public class Runner {
 		int kFact = getFactorial(k);
 		int n_kFact = getFactorial(n-k);
 		
-		double divided = nFact / kFact * n_kFact;
+		double divided = nFact / (kFact * n_kFact);
 		
 		if (divided % 1 != 0)
 			System.out.println("combinum "+divided+" not int");
