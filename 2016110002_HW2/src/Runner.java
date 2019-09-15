@@ -14,13 +14,11 @@ public class Runner {
 		ArrayList<Integer> point2 = new ArrayList<Integer>() {{add(4); add(2);}};
 		ArrayList<Integer> point3 = new ArrayList<Integer>() {{add(4); add(3);}};
 		ArrayList<Integer> point4 = new ArrayList<Integer>() {{add(4); add(4);}};
-		ArrayList<Integer> point5 = new ArrayList<Integer>() {{add(3); add(2);}};
-		ArrayList<Integer> point6 = new ArrayList<Integer>() {{add(4); add(2);}};
-		ArrayList<Integer> point7 = new ArrayList<Integer>() {{add(5); add(2);}};
+		ArrayList<Integer> point5 = new ArrayList<Integer>() {{add(5); add(2);}};
+		ArrayList<Integer> point6 = new ArrayList<Integer>() {{add(6); add(3);}};
 		
 		ArrayList<ArrayList<Integer>> points = new ArrayList<ArrayList<Integer>>() {{add(point1); add(point2); add(point3);
-																					 add(point4); add(point5); add(point6);
-																					 add(point7);}};
+																					 add(point4); add(point5); add(point6);}};
 		int[][] combisIdx = getCombisIdx(points.size());
 		
 		HashSet<ArrayList<ArrayList<Integer>>> lineSegments = new HashSet<ArrayList<ArrayList<Integer>>>();
@@ -186,6 +184,11 @@ public class Runner {
 	}
 	
 	public static boolean isIntersect(ArrayList<ArrayList<Integer>> ab, ArrayList<ArrayList<Integer>> cd) {
+		// If two segments have common point
+		if(ab.contains(cd.get(0)) || ab.contains(cd.get(1))) {
+			return true;
+		}
+		
 		int abCcw = ccw(ab.get(0), ab.get(1), cd.get(0)) * ccw(ab.get(0), ab.get(1), cd.get(1));
 		int cdCcw = ccw(cd.get(0), cd.get(1), ab.get(0)) * ccw(cd.get(0), cd.get(1), ab.get(1));
 		if (abCcw < 0 && cdCcw < 0) {
