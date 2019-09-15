@@ -5,62 +5,113 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Collections;
 import java.util.Comparator;
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.File;
 
 public class Runner {
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		ArrayList<Integer> point1 = new ArrayList<Integer>() {{add(2); add(1);}};
-		ArrayList<Integer> point2 = new ArrayList<Integer>() {{add(3); add(2);}};
-		ArrayList<Integer> point3 = new ArrayList<Integer>() {{add(5); add(4);}};
-		ArrayList<Integer> point4 = new ArrayList<Integer>() {{add(2); add(3);}};
-		ArrayList<Integer> point5 = new ArrayList<Integer>() {{add(4); add(2);}};
-		ArrayList<Integer> point6 = new ArrayList<Integer>() {{add(6); add(1);}};
+	public static void main(String[] args) throws NumberFormatException, IOException {
+		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/input.txt";
+		FileReader fileReader = new FileReader(inputPath);
+		BufferedReader bufferReader = new BufferedReader(fileReader);
 		
-		ArrayList<ArrayList<Integer>> points = new ArrayList<ArrayList<Integer>>() {{add(point1); add(point2); add(point3);
-																					 add(point4); add(point5); add(point6);}};
-		int[][] combisIdx = getCombisIdx(points.size());
+		String outputPath = "/Users/poza/jam/2019_2/algorithm_analysis/2016110002.txt";
+		File file = new File(outputPath);
+		BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
 		
-		HashSet<ArrayList<ArrayList<Integer>>> lineSegments = new HashSet<ArrayList<ArrayList<Integer>>>();
-		// get combis that can get line segment
-		for(int[] combiIdx: combisIdx) {
-			// get ArrayList<Integer> combiPoints by combiIdx
-			ArrayList<ArrayList<Integer>> combiPoints = new ArrayList<ArrayList<Integer>>();
-			for(int idx: combiIdx)
-				combiPoints.add(points.get(idx));
+		int nCase = Integer.parseInt(bufferReader.readLine().trim());
+		
+		for(int i = 0; i < nCase; i++) {
+			ArrayList<ArrayList<Integer>> points = getPoints(bufferReader);
 			
-			// know if it can be line segment by applying ccw for combiPoints
-			int pointsCcw = ccw(combiPoints.get(0), combiPoints.get(1), combiPoints.get(2));
+			int[][] combisIdx = getCombisIdx(points.size());
 			
-			// if not parallel continue
-			if (pointsCcw != 0)
-				continue;
-			
-			// else
-			else {
-				ArrayList<ArrayList<Integer>> excludedPoints = getExcludedPoints(combiPoints, points);
-				// find additional parallel point
-				combiPoints = addParallelPoint(combiPoints, excludedPoints);
+			HashSet<ArrayList<ArrayList<Integer>>> lineSegments = new HashSet<ArrayList<ArrayList<Integer>>>();
+			// get combis that can get line segment
+			for(int[] combiIdx: combisIdx) {
+				// get ArrayList<Integer> combiPoints by combiIdx
+				ArrayList<ArrayList<Integer>> combiPoints = new ArrayList<ArrayList<Integer>>();
+				for(int idx: combiIdx)
+					combiPoints.add(points.get(idx));
 				
-				// get start point and end point by sorting them
-				ArrayList<ArrayList<Integer>> startEndPoints = getStartEndPoints(combiPoints);
-				// add startEndPoints to lineSegments
-				lineSegments.add(startEndPoints);
+				// know if it can be line segment by applying ccw for combiPoints
+				int pointsCcw = ccw(combiPoints.get(0), combiPoints.get(1), combiPoints.get(2));
+				
+				// if not parallel continue
+				if (pointsCcw != 0)
+					continue;
+				
+				// else
+				else {
+					ArrayList<ArrayList<Integer>> excludedPoints = getExcludedPoints(combiPoints, points);
+					// find additional parallel point
+					combiPoints = addParallelPoint(combiPoints, excludedPoints);
+					
+					// get start point and end point by sorting them
+					ArrayList<ArrayList<Integer>> startEndPoints = getStartEndPoints(combiPoints);
+					// add startEndPoints to lineSegments
+					lineSegments.add(startEndPoints);
+				}
 			}
+			
+			// get unique intersetions from lineSegments
+			HashSet<ArrayList<Double>> uniqueInter = getUniqueInter(lineSegments);
+			ArrayList<ArrayList<Double>> converted = new ArrayList<ArrayList<Double>>(uniqueInter);
+			
+			// sort intersections
+			ArrayList<ArrayList<Double>> sortedInters = sortDoubleArrayListDouble(converted);
+			
+			writeOutput(sortedInters, bufferedWriter);
 		}
-		
-		// get unique intersetions from lineSegments
-		HashSet<ArrayList<Double>> uniqueInter = getUniqueInter(lineSegments);
-		ArrayList<ArrayList<Double>> converted = new ArrayList<ArrayList<Double>>(uniqueInter);
-		
-		// sort intersections
-		ArrayList<ArrayList<Double>> sortedInters = sortDoubleArrayListDouble(converted);
-		
-		for(ArrayList<Double> e: sortedInters) {
-			System.out.println(e);
-		}
-		// convert Double to Integer if coordinate is integer
+		bufferReader.close();
+		bufferedWriter.close();
 	}
+
+	public static ArrayList<ArrayList<Integer>> getPoints(BufferedReader bufferReader) throws IOException{
+		// read test case first line '\n'
+		bufferReader.readLine();
+		
+		int nPoints = Integer.parseInt(bufferReader.readLine().trim());
+		ArrayList<ArrayList<Integer>> points = new ArrayList<ArrayList<Integer>>();
+		
+		for(int n = 0; n < nPoints; n++) {
+			String[] splited = bufferReader.readLine().trim().split(" ");
+			ArrayList<Integer> point = new ArrayList<Integer>();
+			for(String s: splited) {
+				int coord = Integer.parseInt(s);
+				point.add(coord);
+			}
+			points.add(point);
+		}
+		
+		return points;
+	}
+	
+	public static void writeOutput(ArrayList<ArrayList<Double>> sortedInters, BufferedWriter bufferedWriter) throws IOException {
+		String n = String.valueOf(sortedInters.size());
+		bufferedWriter.write(n);
+		bufferedWriter.newLine();
+		
+		for(ArrayList<Double> inter: sortedInters) {
+			String result = String.format("%s %s", getConverted(inter.get(0)), getConverted(inter.get(1)));
+			bufferedWriter.write(result);
+			bufferedWriter.newLine();
+		}
+		bufferedWriter.newLine();
+	}
+	
+	public static String getConverted(Double coord) {
+		if(coord % 1.0 == 0.0)
+			return String.valueOf(Math.round(coord));
+		else
+			return String.valueOf(coord);
+	}
+	
 	public static int[][] getCombisIdx(int pointSize){
 		int r = 3;
 		int n = pointSize;
@@ -369,3 +420,4 @@ public class Runner {
 		return target;
 	}
 }
+
