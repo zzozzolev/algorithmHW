@@ -10,12 +10,12 @@ public class Runner {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		ArrayList<Integer> point1 = new ArrayList<Integer>() {{add(4); add(1);}};
-		ArrayList<Integer> point2 = new ArrayList<Integer>() {{add(4); add(2);}};
-		ArrayList<Integer> point3 = new ArrayList<Integer>() {{add(4); add(3);}};
-		ArrayList<Integer> point4 = new ArrayList<Integer>() {{add(4); add(4);}};
-		ArrayList<Integer> point5 = new ArrayList<Integer>() {{add(5); add(2);}};
-		ArrayList<Integer> point6 = new ArrayList<Integer>() {{add(6); add(3);}};
+		ArrayList<Integer> point1 = new ArrayList<Integer>() {{add(2); add(1);}};
+		ArrayList<Integer> point2 = new ArrayList<Integer>() {{add(3); add(2);}};
+		ArrayList<Integer> point3 = new ArrayList<Integer>() {{add(5); add(4);}};
+		ArrayList<Integer> point4 = new ArrayList<Integer>() {{add(2); add(3);}};
+		ArrayList<Integer> point5 = new ArrayList<Integer>() {{add(4); add(2);}};
+		ArrayList<Integer> point6 = new ArrayList<Integer>() {{add(6); add(1);}};
 		
 		ArrayList<ArrayList<Integer>> points = new ArrayList<ArrayList<Integer>>() {{add(point1); add(point2); add(point3);
 																					 add(point4); add(point5); add(point6);}};
@@ -336,7 +336,7 @@ public class Runner {
 	}
 	
 	public static double roundByFirstDecimal(double d) {
-		return Math.round(d * 10 / 10.0);
+		return Math.round(d * 10) / 10.0;
 	}
 	
 	public static ArrayList<ArrayList<Integer>> sortDoubleArrayListInteger(ArrayList<ArrayList<Integer>> target){
