@@ -10,12 +10,13 @@ public class Runner {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		ArrayList<Integer> point1 = new ArrayList<Integer>() {{add(1); add(1);}};
-		ArrayList<Integer> point2 = new ArrayList<Integer>() {{add(1); add(2);}};
-		ArrayList<Integer> point3 = new ArrayList<Integer>() {{add(1); add(3);}};
-		ArrayList<Integer> point4 = new ArrayList<Integer>() {{add(1); add(3);}};
-		ArrayList<Integer> point5 = new ArrayList<Integer>() {{add(2); add(2);}};
-		ArrayList<Integer> point6 = new ArrayList<Integer>() {{add(3); add(3);}};
+		ArrayList<Integer> point1 = new ArrayList<Integer>() {{add(6); add(3);}};
+		ArrayList<Integer> point2 = new ArrayList<Integer>() {{add(6); add(2);}};
+		ArrayList<Integer> point3 = new ArrayList<Integer>() {{add(6); add(1);}};
+		ArrayList<Integer> point4 = new ArrayList<Integer>() {{add(2); add(1);}};
+		ArrayList<Integer> point5 = new ArrayList<Integer>() {{add(3); add(2);}};
+		ArrayList<Integer> point6 = new ArrayList<Integer>() {{add(5); add(4);}};
+		
 		ArrayList<ArrayList<Integer>> points = new ArrayList<ArrayList<Integer>>() {{add(point1); add(point2); add(point3);
 																					 add(point4); add(point5); add(point6);}};
 		int[][] combisIdx = getCombisIdx(points.size());
@@ -114,7 +115,6 @@ public class Runner {
 		// get counterclockwise of point c for point a and b
 		// (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1)
 		int exp = (b.get(0) - a.get(0)) * (c.get(1) - a.get(1)) - (b.get(1) - a.get(1)) * (c.get(0) - a.get(0));
-		
 		// parallel
 		if (exp == 0) 
 			return 0;
@@ -199,15 +199,54 @@ public class Runner {
 		double cdSlope = getSlope(cd);
 		double cdYInter = getYIntercept(cd.get(0), cdSlope);
 		
+		ArrayList<Double> intersection = null;
+		if (abSlope == 0 && cdSlope == 0) {
+			intersection = getInterAllZeroSlope(ab, cd);
+		}
+		else if(abSlope == 0) {
+			intersection = getInterOneZeroSlope(ab, cdSlope, cdYInter);
+		}
+		else if(cdSlope == 0) {
+			intersection = getInterOneZeroSlope(cd, abSlope, abYInter);
+		}
+		else {
+			intersection = getInterUnZeroSlope(abSlope, abYInter, cdSlope, cdYInter);
+		}
+		
+		ArrayList<Double> roundedInter = new ArrayList<Double>();
+		// round intersection
+		Double rounded_x = roundByFirstDecimal(intersection.get(0)); 
+		Double rounded_y = roundByFirstDecimal(intersection.get(1));
+		
+		roundedInter.add(rounded_x);
+		roundedInter.add(rounded_y);
+		
+		return roundedInter;
+	}
+	
+	public static double getSlope(ArrayList<ArrayList<Integer>> ab) {
+		ArrayList<Integer> a = ab.get(0);
+		ArrayList<Integer> b = ab.get(1);
+		
+		// when x increase is zero
+		if (b.get(0) - a.get(0) == 0)
+			return 0;
+		
+		Integer numerator = b.get(1) - a.get(1);
+		Double denominator = new Double((b.get(0) - a.get(0)));
+		
+		return numerator / denominator;
+	}
+	
+	public static double getYIntercept(ArrayList<Integer> a, double slope) {
+		return a.get(1) - slope * a.get(0);
+	}
+	
+	public static ArrayList<Double> getInterUnZeroSlope(double abSlope, double abYInter, double cdSlope, double cdYInter){
 		ArrayList<Double> intersection = new ArrayList<Double>();
 		
-		Double raw_x = (cdYInter-abYInter) / (abSlope-cdSlope);
-		
-		Double rounded_x = roundByFirstDecimal(raw_x); 
-		Double rounded_y = roundByFirstDecimal(abSlope * raw_x + abYInter);
-		
-		Double x = (Double)(rounded_x);
-		Double y = (Double)(rounded_y);
+		Double x = (cdYInter-abYInter) / (abSlope-cdSlope);
+		Double y = abSlope * x + abYInter;
 		
 		intersection.add(x);
 		intersection.add(y);
@@ -215,15 +254,79 @@ public class Runner {
 		return intersection;
 	}
 	
-	public static double getSlope(ArrayList<ArrayList<Integer>> ab) {
-		ArrayList<Integer> a = ab.get(0);
-		ArrayList<Integer> b = ab.get(1);
+	public static ArrayList<Double> getInterOneZeroSlope(ArrayList<ArrayList<Integer>> zeroSlopeSeg, double slope, double yInter){
+		ArrayList<Double> intersection = new ArrayList<Double>();
 		
-		return (b.get(1) - a.get(1)) / (b.get(0) - a.get(0));
+		// get x or y from zeroSlopeSeg
+		ArrayList<Double> setCoord = setCoordZero(zeroSlopeSeg);
+		
+		// x = (y - b) / a
+		// y = ax + b
+		if (setCoord.get(0) != 0) {
+			intersection.add(setCoord.get(0));
+			Double y = slope * setCoord.get(0) + yInter;
+			intersection.add(y);
+		}
+		else if (setCoord.get(1) != 0) {
+			Double x = (setCoord.get(1) - yInter) / slope;
+			intersection.add(x);
+			intersection.add(setCoord.get(1));
+		}
+		
+		else 
+			System.out.println("invalid setCoord: "+setCoord);
+		
+		return intersection;
+		
 	}
 	
-	public static double getYIntercept(ArrayList<Integer> a, double slope) {
-		return a.get(1) - slope * a.get(0);
+	public static ArrayList<Double> getInterAllZeroSlope(ArrayList<ArrayList<Integer>> ab, ArrayList<ArrayList<Integer>> cd){
+		ArrayList<Double> intersection = new ArrayList<Double>();
+		
+		ArrayList<Double> abSetCoord = setCoordZero(ab);
+		ArrayList<Double> cdSetCoord = setCoordZero(cd);
+		
+		Double x = null;
+		Double y = null;
+		
+		if (abSetCoord.get(0) != 0 && cdSetCoord.get(1) != 0) {
+			x = abSetCoord.get(0);
+			y = cdSetCoord.get(1);
+		}
+		
+		else if (cdSetCoord.get(0) != 0 && abSetCoord.get(1) != 0) {
+			x = cdSetCoord.get(0);
+			y = abSetCoord.get(1);
+		}
+		
+		else
+			System.out.println("invalid SetCoord: "+abSetCoord+", "+cdSetCoord);
+		
+		intersection.add(x);
+		intersection.add(y);
+		
+		return intersection;
+	}
+	
+	public static ArrayList<Double> setCoordZero(ArrayList<ArrayList<Integer>> zeroSlopeSeg){
+		ArrayList<Double> setCoord = new ArrayList<Double>();
+		
+		ArrayList<Integer> ab = zeroSlopeSeg.get(0);
+		ArrayList<Integer> cd = zeroSlopeSeg.get(1);
+		
+		if(ab.get(0) == cd.get(0)) {
+			setCoord.add(new Double(ab.get(0)));
+			setCoord.add(0.0);
+		}
+		else if(ab.get(1) == cd.get(1)) {
+			setCoord.add(0.0);
+			setCoord.add(new Double(ab.get(1)));
+		}
+		else
+			System.out.println("invalid zeroSlopeSeg: "+ab+", "+cd);
+		
+		return setCoord;
+			
 	}
 	
 	public static double roundByFirstDecimal(double d) {
