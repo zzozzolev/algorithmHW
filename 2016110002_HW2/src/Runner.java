@@ -16,7 +16,7 @@ import java.io.File;
 public class Runner {
 
 	public static void main(String[] args) throws NumberFormatException, IOException {
-		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/input.txt";
+		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/input2.txt";
 		FileReader fileReader = new FileReader(inputPath);
 		BufferedReader bufferReader = new BufferedReader(fileReader);
 		
@@ -253,7 +253,7 @@ public class Runner {
 		int cdCcw = ccw(cd.get(0), cd.get(1), ab.get(0)) * ccw(cd.get(0), cd.get(1), ab.get(1));
 		
 		// If both ccw multiplications of two segments for other is negative
-		if (abCcw < 0 && cdCcw < 0) {
+		if ((abCcw < 0 && cdCcw < 0) || (abCcw < 0 && cdCcw == 0) || (abCcw == 0 && cdCcw < 0)) {
 			return true;
 		}
 		else
