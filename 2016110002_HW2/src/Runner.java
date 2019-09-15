@@ -10,18 +10,20 @@ public class Runner {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		ArrayList<Integer> point1 = new ArrayList<Integer>() {{add(6); add(3);}};
-		ArrayList<Integer> point2 = new ArrayList<Integer>() {{add(6); add(2);}};
-		ArrayList<Integer> point3 = new ArrayList<Integer>() {{add(6); add(1);}};
-		ArrayList<Integer> point4 = new ArrayList<Integer>() {{add(2); add(1);}};
+		ArrayList<Integer> point1 = new ArrayList<Integer>() {{add(4); add(1);}};
+		ArrayList<Integer> point2 = new ArrayList<Integer>() {{add(4); add(2);}};
+		ArrayList<Integer> point3 = new ArrayList<Integer>() {{add(4); add(3);}};
+		ArrayList<Integer> point4 = new ArrayList<Integer>() {{add(4); add(4);}};
 		ArrayList<Integer> point5 = new ArrayList<Integer>() {{add(3); add(2);}};
-		ArrayList<Integer> point6 = new ArrayList<Integer>() {{add(5); add(4);}};
+		ArrayList<Integer> point6 = new ArrayList<Integer>() {{add(4); add(2);}};
+		ArrayList<Integer> point7 = new ArrayList<Integer>() {{add(5); add(2);}};
 		
 		ArrayList<ArrayList<Integer>> points = new ArrayList<ArrayList<Integer>>() {{add(point1); add(point2); add(point3);
-																					 add(point4); add(point5); add(point6);}};
+																					 add(point4); add(point5); add(point6);
+																					 add(point7);}};
 		int[][] combisIdx = getCombisIdx(points.size());
 		
-		ArrayList<ArrayList<ArrayList<Integer>>> lineSegments = new ArrayList<ArrayList<ArrayList<Integer>>>();
+		HashSet<ArrayList<ArrayList<Integer>>> lineSegments = new HashSet<ArrayList<ArrayList<Integer>>>();
 		// get combis that can get line segment
 		for(int[] combiIdx: combisIdx) {
 			// get ArrayList<Integer> combiPoints by combiIdx
@@ -164,12 +166,13 @@ public class Runner {
 		return startEndPoints;
 	}
 	
-	public static HashSet<ArrayList<Double>> getUniqueInter(ArrayList<ArrayList<ArrayList<Integer>>> lineSegments){
+	public static HashSet<ArrayList<Double>> getUniqueInter(HashSet<ArrayList<ArrayList<Integer>>> lineSegments){
 		HashSet<ArrayList<Double>> uniqueInter = new HashSet<ArrayList<Double>>();
-		for(int i = 0; i < lineSegments.size(); i++) {
-			ArrayList<ArrayList<Integer>> target = lineSegments.get(i);
+		ArrayList<ArrayList<ArrayList<Integer>>> convertedLineSegs = new ArrayList<ArrayList<ArrayList<Integer>>>(lineSegments);
+		for(int i = 0; i < convertedLineSegs.size(); i++) {
+			ArrayList<ArrayList<Integer>> target = convertedLineSegs.get(i);
 			for(int j = i+1; j < lineSegments.size(); j++) {
-				ArrayList<ArrayList<Integer>> compared = lineSegments.get(j);
+				ArrayList<ArrayList<Integer>> compared = convertedLineSegs.get(j);
 				boolean intersect = isIntersect(target, compared);
 				if (!intersect) 
 					continue;
