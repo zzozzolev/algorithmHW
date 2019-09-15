@@ -26,13 +26,16 @@ public class Runner {
 		
 		int nCase = Integer.parseInt(bufferReader.readLine().trim());
 		
+		// iterate nCase times
 		for(int i = 0; i < nCase; i++) {
+			// get points from input case 
 			ArrayList<ArrayList<Integer>> points = getPoints(bufferReader);
 			
+			// get combinations of index composed of three different points
 			int[][] combisIdx = getCombisIdx(points.size());
 			
 			HashSet<ArrayList<ArrayList<Integer>>> lineSegments = new HashSet<ArrayList<ArrayList<Integer>>>();
-			// get combis that can get line segment
+			// get combinations that can get line segment
 			for(int[] combiIdx: combisIdx) {
 				// get ArrayList<Integer> combiPoints by combiIdx
 				ArrayList<ArrayList<Integer>> combiPoints = new ArrayList<ArrayList<Integer>>();
@@ -48,6 +51,7 @@ public class Runner {
 				
 				// else
 				else {
+					// exclude combiPoints from points not to add duplicated points
 					ArrayList<ArrayList<Integer>> excludedPoints = getExcludedPoints(combiPoints, points);
 					// find additional parallel point
 					combiPoints = addParallelPoint(combiPoints, excludedPoints);
@@ -59,7 +63,7 @@ public class Runner {
 				}
 			}
 			
-			// get unique intersetions from lineSegments
+			// get unique intersections from lineSegments
 			HashSet<ArrayList<Double>> uniqueInter = getUniqueInter(lineSegments);
 			ArrayList<ArrayList<Double>> converted = new ArrayList<ArrayList<Double>>(uniqueInter);
 			
@@ -113,6 +117,7 @@ public class Runner {
 	}
 	
 	public static int[][] getCombisIdx(int pointSize){
+		// get combinations of three different points index
 		int r = 3;
 		int n = pointSize;
 		
@@ -189,12 +194,14 @@ public class Runner {
 	}
 	
 	public static ArrayList<ArrayList<Integer>> addParallelPoint(ArrayList<ArrayList<Integer>> combiPoints, ArrayList<ArrayList<Integer>> excludedPoints){
+		// add other points which is parallel with combiPoints to combiPoints
 		if (combiPoints.size() != 3)
 			System.out.println("combiPoints size != 3");
 		
 		for(ArrayList<Integer> point: excludedPoints) {
 			int pointsCcw = ccw(combiPoints.get(0), combiPoints.get(1), point);
 			
+			// parallel
 			if (pointsCcw == 0)
 				combiPoints.add(point);
 			else
@@ -216,10 +223,12 @@ public class Runner {
 	}
 	
 	public static HashSet<ArrayList<Double>> getUniqueInter(HashSet<ArrayList<ArrayList<Integer>>> lineSegments){
+		// get intersections from lineSegments
 		HashSet<ArrayList<Double>> uniqueInter = new HashSet<ArrayList<Double>>();
 		ArrayList<ArrayList<ArrayList<Integer>>> convertedLineSegs = new ArrayList<ArrayList<ArrayList<Integer>>>(lineSegments);
 		for(int i = 0; i < convertedLineSegs.size(); i++) {
 			ArrayList<ArrayList<Integer>> target = convertedLineSegs.get(i);
+			// check out if two line segments have intersections by iterating them sequentially
 			for(int j = i+1; j < lineSegments.size(); j++) {
 				ArrayList<ArrayList<Integer>> compared = convertedLineSegs.get(j);
 				boolean intersect = isIntersect(target, compared);
@@ -242,6 +251,8 @@ public class Runner {
 		
 		int abCcw = ccw(ab.get(0), ab.get(1), cd.get(0)) * ccw(ab.get(0), ab.get(1), cd.get(1));
 		int cdCcw = ccw(cd.get(0), cd.get(1), ab.get(0)) * ccw(cd.get(0), cd.get(1), ab.get(1));
+		
+		// If both ccw multiplications of two segments for other is negative
 		if (abCcw < 0 && cdCcw < 0) {
 			return true;
 		}
@@ -250,6 +261,7 @@ public class Runner {
 	}
 	
 	public static ArrayList<Double> getIntersection(ArrayList<ArrayList<Integer>> ab, ArrayList<ArrayList<Integer>> cd){
+		// get slope and y intercept
 		double abSlope = getSlope(ab);
 		double abYInter = getYIntercept(ab.get(0), abSlope);
 		
@@ -257,15 +269,18 @@ public class Runner {
 		double cdYInter = getYIntercept(cd.get(0), cdSlope);
 		
 		ArrayList<Double> intersection = null;
+		// x = a, y = b
 		if (abSlope == 0 && cdSlope == 0) {
 			intersection = getInterAllZeroSlope(ab, cd);
 		}
+		// (x = a or y = b) and y = cx + d
 		else if(abSlope == 0) {
 			intersection = getInterOneZeroSlope(ab, cdSlope, cdYInter);
 		}
 		else if(cdSlope == 0) {
 			intersection = getInterOneZeroSlope(cd, abSlope, abYInter);
 		}
+		// y = ax + b and y = cx + d
 		else {
 			intersection = getInterUnZeroSlope(abSlope, abYInter, cdSlope, cdYInter);
 		}
@@ -290,6 +305,8 @@ public class Runner {
 			return 0;
 		
 		Integer numerator = b.get(1) - a.get(1);
+		// convert Integer to Double not to get zero 
+		// when denominator is greater than numerator
 		Double denominator = new Double((b.get(0) - a.get(0)));
 		
 		return numerator / denominator;
