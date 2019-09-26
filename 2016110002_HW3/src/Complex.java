@@ -24,8 +24,8 @@ public class Complex {
 	}
 	
 	public void roundBySeventhDecimal() {
-		this.real = Math.round(this.real * Math.pow(10, 7)) / Math.pow(10, 7);
-		this.imag = Math.round(this.imag * Math.pow(10, 7)) / Math.pow(10, 7);
+		this.real = Math.round(this.real * Math.pow(10, 6)) / Math.pow(10, 6);
+		this.imag = Math.round(this.imag * Math.pow(10, 6)) / Math.pow(10, 6);
 	}
 	
 	@Override
