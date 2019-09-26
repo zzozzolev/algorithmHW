@@ -4,19 +4,16 @@ public class Runner {
 
 	public static void main(String[] args) {
 		int max_deg = 7;
-		int n = 8;
-		double PI = 3.141592;
+		int n = getN(max_deg);
 		
 		int[] a = new int[]{0, 1, 2, 3, 4, 5, 6, 7};
 		Complex[] A = new Complex[n];
-		
-		double kth = 2.0 * 1 * PI / 8;
 		
 		fft(a, A);
 		
 		for (Complex c: A) {
 			c.roundBySeventhDecimal();
-			System.out.println(c);
+			System.out.println(c.real+" "+c.imag);
 		}
 	}
 	
@@ -52,6 +49,19 @@ public class Runner {
 			wk.multiMinus();
 			A[k + n/2] = Complex.sum(even_A[k], Complex.multi(wk, odd_A[k]));
 		}
+	}
+	public static int getN(int max_deg) {
+		// maximum of max_deg = 63, so max 2^k = 64, k = 6
+		int max_k = 6;
+		
+		for(int k = 1; k < max_k + 1; k++) {
+			int two_k = (int)Math.pow(2, k);
+			if (max_deg < two_k)
+				return two_k;
+		}
+		System.out.println("invalid max_deg: "+max_deg);
+		return -1;
+			
 	}
 	
 	public static void splitIntoEvenOdd(int[] a, int[] even, int[] odd) {
