@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,7 +14,7 @@ import java.io.FileNotFoundException;
 public class Runner {
 
 	public static void main(String[] args) throws IOException {
-		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/textbook_edited.txt";
+		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/unconnected.txt";
 		FileReader fileReader = new FileReader(inputPath);
 		BufferedReader bufferReader = new BufferedReader(fileReader);
 		
@@ -37,6 +38,8 @@ public class Runner {
 		int nIter = (vertexNum * (vertexNum - 1)) / 2;
 		for(int i = 0; i < nIter; i++) {
 			int minCut = getMinCut(edges, vertexNum);
+			if (minCut == -1) 
+				continue;
 			if (minCut < totalMinCut || totalMinCut == -1)
 				totalMinCut = minCut;
 		}
@@ -45,7 +48,6 @@ public class Runner {
 		
 	}
 	public static int getMinCut(ArrayList<Edge> edges, int vertexNum) {
-		// TODO: connected component가 아닌 경우가 있
 		int[] parents = new int[vertexNum];
 		int[] ranks = new int[vertexNum];
 		ArrayList<Edge> mst = new ArrayList<Edge>();
@@ -73,9 +75,14 @@ public class Runner {
 			}
 		}
 		
-		int minCut = getDiffParentVertexNum(parents, edges);
+		boolean existUnConnected = isExistUnConnected(parents);
 		
-		return minCut;
+		if (existUnConnected) 
+			return -1;
+		
+		else 
+			return getDiffParentVertexNum(parents, edges);
+		
 	}
 	
 	public static void initParents(int[] parents) {
@@ -130,6 +137,29 @@ public class Runner {
 			parents[vertex] = find(parents[vertex], parents);
 		}
 		return parents[vertex];
+	}
+	
+	public static boolean isExistUnConnected(int[] parents) {
+		HashMap<Integer, Integer> counter = new HashMap<Integer, Integer>();
+		for(int parent: parents) {
+			if (counter.containsKey(parent)) {
+				int num = counter.get(parent);
+				counter.put(parent, num+1);
+			}
+			else
+				counter.put(parent, 1);
+		}
+		
+		// there are only two group
+		if (counter.size() == 2) {
+			for(int num: counter.values()) {
+				// unconnected
+				if (num == 1)
+					return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	public static int getDiffParentVertexNum(int[] parents, ArrayList<Edge> edges) {
