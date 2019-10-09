@@ -13,4 +13,8 @@ public class Edge {
 		this.weight = weight;
 	}
 	
+	@Override
+	public String toString() {
+		return String.format("(%d, %d), w:%d", this.left, this.right, this.weight);
+	}
 }
