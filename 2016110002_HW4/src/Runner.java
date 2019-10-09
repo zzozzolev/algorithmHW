@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.io.FileReader;
@@ -12,7 +13,7 @@ import java.io.FileNotFoundException;
 public class Runner {
 
 	public static void main(String[] args) throws IOException {
-		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/input.txt";
+		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/textbook_edited.txt";
 		FileReader fileReader = new FileReader(inputPath);
 		BufferedReader bufferReader = new BufferedReader(fileReader);
 		
@@ -44,6 +45,7 @@ public class Runner {
 		
 	}
 	public static int getMinCut(ArrayList<Edge> edges, int vertexNum) {
+		// TODO: connected component가 아닌 경우가 있
 		int[] parents = new int[vertexNum];
 		int[] ranks = new int[vertexNum];
 		ArrayList<Edge> mst = new ArrayList<Edge>();
@@ -64,7 +66,7 @@ public class Runner {
 				break;
 			}
 			Edge e = edges.get(i);
-			System.out.println(e);
+			
 			if (find(e.left, parents) != find(e.right, parents)) {
 				mst.add(e);
 				unionByRank(e, parents, ranks);
@@ -125,7 +127,7 @@ public class Runner {
 	public static int find(int vertex, int[] parents) {
 		// path compression
 		if (parents[vertex] != vertex) {
-			parents[vertex] = find(vertex, parents);
+			parents[vertex] = find(parents[vertex], parents);
 		}
 		return parents[vertex];
 	}
