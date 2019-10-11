@@ -3,6 +3,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Random;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -36,8 +37,13 @@ public class Runner {
 		
 		// getMinCut n*(n-1)/2 times
 		int nIter = (vertexNum * (vertexNum - 1)) / 2;
+		ArrayList<ArrayList<Integer>> totalMixed = new ArrayList<ArrayList<Integer>>(); 
+		int randomSeed = 0;
+		
 		for(int i = 0; i < nIter; i++) {
-			int minCut = getMinCut(edges, vertexNum);
+			int[] seedAndMinCut = getMinCut(edges, vertexNum, randomSeed, totalMixed);
+			randomSeed = seedAndMinCut[0];
+			int minCut = seedAndMinCut[1];
 			if (minCut == -1) 
 				continue;
 			if (minCut < totalMinCut || totalMinCut == -1)
@@ -47,7 +53,7 @@ public class Runner {
 		System.out.println("min cut "+totalMinCut);
 		
 	}
-	public static int getMinCut(ArrayList<Edge> edges, int vertexNum) {
+	public static int[] getMinCut(ArrayList<Edge> edges, int vertexNum, int randomSeed, ArrayList<ArrayList<Integer>> totalMixed) {
 		int[] parents = new int[vertexNum];
 		int[] ranks = new int[vertexNum];
 		ArrayList<Edge> mst = new ArrayList<Edge>();
@@ -56,7 +62,7 @@ public class Runner {
 		initParents(parents);
 		
 		// assign weights to the edges randomly
-		assignWeights(edges);
+		randomSeed = assignWeights(edges, randomSeed, totalMixed);
 		
 		// sort the edges by weight in ascending order
 		sortEdges(edges);
@@ -77,11 +83,16 @@ public class Runner {
 		
 		boolean existUnConnected = isExistUnConnected(parents);
 		
+		int[] seedAndMinCut = new int[2];
+		seedAndMinCut[0] = randomSeed;
+		
 		if (existUnConnected) 
-			return -1;
+			seedAndMinCut[1] = -1;
 		
 		else 
-			return getDiffParentVertexNum(parents, edges);
+			seedAndMinCut[1] = getDiffParentVertexNum(parents, edges);
+		
+		return seedAndMinCut;
 		
 	}
 	
@@ -91,14 +102,48 @@ public class Runner {
 		}
 	}
 	
-	public static void assignWeights(ArrayList<Edge> edges) {
-		Collections.shuffle(edges);
+	public static int assignWeights(ArrayList<Edge> edges, int randomSeed, ArrayList<ArrayList<Integer>> totalMixed) {
+		ArrayList<Integer> mixed;
+		boolean flag = false;
+		// get mixed index until mixed is not in totalMixed
+		do {
+			mixed = getMixed(randomSeed, edges.size());
+		  	// if mixed is already in totalMixed 
+		  	if (totalMixed.contains(mixed)) {
+		  		flag = true;
+		  	}
+		  	else {
+		  		totalMixed.add(mixed);
+		  		flag = false;
+		  	}
+		  	randomSeed ++;
+		  	
+		} while(flag);
 		
 		for(int i = 0; i < edges.size(); i++) {
-			Edge e = edges.get(i);
+			Edge e = edges.get(mixed.get(i));
 			e.setWeight(i+1);
 		}
 		
+		return randomSeed;
+	}
+	
+	public static ArrayList<Integer> getMixed(int randomSeed, int edgeSize) {
+		Random r = new Random(randomSeed);
+		ArrayList<Integer> index = new ArrayList<Integer>();
+		ArrayList<Integer> mixed = new ArrayList<Integer>();
+		
+		for(int i=0; i < edgeSize; i++) {
+			index.add(i);
+		}
+		
+		for(int i=index.size(); i>0; i--) {
+			int randInt = r.nextInt(i);
+			mixed.add(index.get(randInt));
+			index.remove(randInt);
+		}
+		
+		return mixed;
 	}
 	
 	public static void sortEdges(ArrayList<Edge> edges) {
