@@ -15,43 +15,52 @@ import java.io.FileNotFoundException;
 public class Runner {
 
 	public static void main(String[] args) throws IOException {
-		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/unconnected.txt";
+		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/input.txt";
 		FileReader fileReader = new FileReader(inputPath);
 		BufferedReader bufferReader = new BufferedReader(fileReader);
 		
-		ArrayList<Edge> edges = new ArrayList<Edge>();
-		int totalMinCut = -1;
+		String outputPath = "/Users/poza/jam/2019_2/algorithm_analysis/2016110002.txt";
+		File file = new File(outputPath);
+		BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
 		
-		String[] splited = bufferReader.readLine().trim().split(" ");
+		int nCase = Integer.parseInt(bufferReader.readLine().trim());
 		
-		int vertexNum = Integer.parseInt(splited[0]);
-		int edgeNum = Integer.parseInt(splited[1]);
-		
-		// init graph
-		for(int i = 0; i < edgeNum; i++) {
-			String[] leftRight = bufferReader.readLine().trim().split(" ");
-			int left = Integer.parseInt(leftRight[0]);
-			int right = Integer.parseInt(leftRight[1]);
-			edges.add(new Edge(left, right));
-		}		
-		
-		// getMinCut n*(n-1)/2 times
-		int nIter = (vertexNum * (vertexNum - 1)) / 2;
-		ArrayList<ArrayList<Integer>> totalMixed = new ArrayList<ArrayList<Integer>>(); 
-		int randomSeed = 0;
-		
-		for(int i = 0; i < nIter; i++) {
-			int[] seedAndMinCut = getMinCut(edges, vertexNum, randomSeed, totalMixed);
-			randomSeed = seedAndMinCut[0];
-			int minCut = seedAndMinCut[1];
-			if (minCut == -1) 
-				continue;
-			if (minCut < totalMinCut || totalMinCut == -1)
-				totalMinCut = minCut;
+		for(int n=1; n <= nCase; n++) {
+			ArrayList<Edge> edges = new ArrayList<Edge>();
+			int totalMinCut = -1;
+			
+			String[] splited = bufferReader.readLine().trim().split(" ");
+			
+			int vertexNum = Integer.parseInt(splited[0]);
+			int edgeNum = Integer.parseInt(splited[1]);
+			
+			// init graph
+			for(int i = 0; i < edgeNum; i++) {
+				String[] leftRight = bufferReader.readLine().trim().split(" ");
+				int left = Integer.parseInt(leftRight[0]);
+				int right = Integer.parseInt(leftRight[1]);
+				edges.add(new Edge(left, right));
+			}		
+			
+			// getMinCut n*(n-1)/2 times
+			int nIter = (vertexNum * (vertexNum - 1)) / 2;
+			ArrayList<ArrayList<Integer>> totalMixed = new ArrayList<ArrayList<Integer>>(); 
+			int randomSeed = 0;
+			
+			for(int i = 0; i < nIter; i++) {
+				int[] seedAndMinCut = getMinCut(edges, vertexNum, randomSeed, totalMixed);
+				randomSeed = seedAndMinCut[0];
+				int minCut = seedAndMinCut[1];
+				if (minCut == -1) 
+					continue;
+				if (minCut < totalMinCut || totalMinCut == -1)
+					totalMinCut = minCut;
+			}
+			bufferedWriter.write(String.format("#%d %d", n, totalMinCut));
+			bufferedWriter.newLine();
 		}
-		
-		System.out.println("min cut "+totalMinCut);
-		
+		bufferReader.close();
+		bufferedWriter.close();	
 	}
 	public static int[] getMinCut(ArrayList<Edge> edges, int vertexNum, int randomSeed, ArrayList<ArrayList<Integer>> totalMixed) {
 		int[] parents = new int[vertexNum];
