@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -27,28 +28,29 @@ public class Runner {
 		
 		// init c 
 		HashMap<ArrayList<Integer>, HashMap<Integer, Integer>> c = new HashMap<ArrayList<Integer>, HashMap<Integer, Integer>>();
-		ArrayList<Integer> initS = new ArrayList<Integer>(){{add(1);}};
+		ArrayList<Integer> initS = new ArrayList<Integer>(){{add(0);}};
 		updateC(c, initS, 1);
 		
-		for (int i = 2; i <= n; i++) {
+		for (int i = 1; i < n; i++) {
 			int[] arr = new int[n];
 			ArrayList<ArrayList<Integer>> subsets = new ArrayList<ArrayList<Integer>>();
-			getCombis(arr, 0, n, i-1, 1, i-1, subsets);
-			
+			getCombis(arr, 0, n, i, 1, i, subsets);
 			// for all subsets S of size i and containing 1
 			for(int j=0; j < subsets.size(); j++) {
 				ArrayList<Integer> s = subsets.get(j);
+				if (!s.contains(0))
+					System.out.println(s+" not 0");
 				// c(s, 1) = inf
 				updateC(c, s, i);
 				// for all end included in subsets
 				for(int k=0; k < s.size(); k++) {
 					int end = s.get(k);
-					// end 1 not allowed
-					if (end == 1)
+					// end 0 not allowed
+					if (end == 0)
 						continue;
 					else {
 						ArrayList<Integer> subtracted = (ArrayList<Integer>) s.clone();
-						subtracted.remove(end);
+						subtracted.remove(Integer.valueOf(end));
 						// get min dist for all second last
 						int minDist = Integer.MAX_VALUE;
 						for (int l=0; l < subtracted.size(); l++) {
@@ -56,7 +58,7 @@ public class Runner {
 							if (dist[secondLast][end] == -1)
 								continue;
 							else {
-								int pairDist = c.get(subtracted).get(l);
+								int pairDist = c.get(subtracted).get(secondLast);
 								if (pairDist < minDist)
 									minDist = pairDist + dist[secondLast][end];
 							}
@@ -73,15 +75,15 @@ public class Runner {
 	public static void getCombis(int[] arr, int index, int n, int r, int target, int origin_r, ArrayList<ArrayList<Integer>> subsets) { 
 		if (r == 0) {
 			ArrayList<Integer> combi = new ArrayList<Integer>();
-			// always include 1
-			combi.add(1);
+			// always include 0
+			combi.add(0);
 			for(int i=0; i<origin_r; i++)
 				combi.add(arr[i]);
 			subsets.add(combi);
 		}
 		else if (target == n) 
 			return; 
-		else { 
+		else {
 			arr[index] = target; 
 			getCombis(arr, index + 1, n, r - 1, target + 1, origin_r, subsets); 
 			getCombis(arr, index, n, r, target + 1, origin_r, subsets); 
@@ -98,25 +100,23 @@ public class Runner {
 			value = Integer.MAX_VALUE;
 		
 		HashMap<Integer, Integer> hm = new HashMap<Integer, Integer>();
-		hm.put(1, value);
-		
+		hm.put(0, value);
 		c.put(s, hm);
 	}
 	
 	public static int getMinDistfromStart(HashMap<ArrayList<Integer>, HashMap<Integer, Integer>> c, int n, int[][] dist) {
 		ArrayList<Integer> all = new ArrayList<Integer>();
-		for (int i=1; i <= n; i++)
+		for (int i=0; i < n; i++)
 			all.add(i);
-		
 		int minDist = Integer.MAX_VALUE;
-		for (int j=2; j <= n; j++) {
+		for (int j=1; j < n; j++) {
 			// j and start 1 not connected
-			if (dist[j][1] == -1)
+			if (dist[j][0] == -1)
 				continue;
 			int secondLastDist = c.get(all).get(j);
 			
 			if (secondLastDist < minDist)
-				minDist = secondLastDist + dist[j][1];
+				minDist = secondLastDist + dist[j][0];
 		}
 		
 		return minDist;
