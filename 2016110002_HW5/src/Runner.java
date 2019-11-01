@@ -67,6 +67,8 @@ public class Runner {
 			}
 					
 		}
+		int minDist = getMinDistfromStart(c, n, dist);
+		System.out.println(minDist);
 	}
 	public static void getCombis(int[] arr, int index, int n, int r, int target, int origin_r, ArrayList<ArrayList<Integer>> subsets) { 
 		if (r == 0) {
@@ -100,5 +102,23 @@ public class Runner {
 		
 		c.put(s, hm);
 	}
-
+	
+	public static int getMinDistfromStart(HashMap<ArrayList<Integer>, HashMap<Integer, Integer>> c, int n, int[][] dist) {
+		ArrayList<Integer> all = new ArrayList<Integer>();
+		for (int i=1; i <= n; i++)
+			all.add(i);
+		
+		int minDist = Integer.MAX_VALUE;
+		for (int j=2; j <= n; j++) {
+			// j and start 1 not connected
+			if (dist[j][1] == -1)
+				continue;
+			int secondLastDist = c.get(all).get(j);
+			
+			if (secondLastDist < minDist)
+				minDist = secondLastDist + dist[j][1];
+		}
+		
+		return minDist;
+	}
 }
