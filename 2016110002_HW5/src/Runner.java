@@ -58,7 +58,7 @@ public class Runner {
 							else {
 								int pairDist = c.get(subtracted).get(l);
 								if (pairDist < minDist)
-									minDist = pairDist;
+									minDist = pairDist + dist[secondLast][end];
 							}
 						}
 						c.get(s).put(end, minDist);
