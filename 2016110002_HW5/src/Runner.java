@@ -12,68 +12,77 @@ import java.io.FileNotFoundException;
 public class Runner {
 
 	public static void main(String[] args) throws NumberFormatException, IOException {
-		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/input2.txt";
+		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/input.txt";
 		FileReader fileReader = new FileReader(inputPath);
 		BufferedReader bufferReader = new BufferedReader(fileReader);
 		
-		// make matrix from given inputs
-		int n = Integer.parseInt(bufferReader.readLine().trim());
+		String outputPath = "/Users/poza/jam/2019_2/algorithm_analysis/2016110002.txt";
+		File file = new File(outputPath);
+		BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
 		
-		int[][] dist = new int[n][n];
-		for(int i=0; i < n; i++) {
-			String[] splited = bufferReader.readLine().trim().split(" ");
-			for(int j=0; j < n; j++)
-				dist[i][j] = Integer.parseInt(splited[j]);
-		}
+		int nCase = Integer.parseInt(bufferReader.readLine().trim());
 		
-		// init c 
-		HashMap<ArrayList<Integer>, HashMap<Integer, Integer>> c = new HashMap<ArrayList<Integer>, HashMap<Integer, Integer>>();
-		ArrayList<Integer> initS = new ArrayList<Integer>(){{add(0);}};
-		updateC(c, initS, 0);
-		for (int i = 1; i < n; i++) {
-			int[] arr = new int[n];
-			ArrayList<ArrayList<Integer>> subsets = new ArrayList<ArrayList<Integer>>();
-			getCombis(arr, 0, n, i, 1, i, subsets);
-			// for all subsets S of size i and containing 1
-			for(int j=0; j < subsets.size(); j++) {
-				ArrayList<Integer> s = subsets.get(j);
-				if (!s.contains(0))
-					System.out.println(s+" not 0");
-				// c(s, 0) = inf
-				updateC(c, s, i);
-				// for all end included in subsets
-				for(int k=0; k < s.size(); k++) {
-					int end = s.get(k);
-					// end 0 not allowed
-					if (end == 0)
-						continue;
-					else {
-						ArrayList<Integer> subtracted = (ArrayList<Integer>) s.clone();
-						subtracted.remove(Integer.valueOf(end));
-						// get min dist for all second last
-						int minDist = Integer.MAX_VALUE;
-						for (int l=0; l < subtracted.size(); l++) {
-							int secondLast = subtracted.get(l);	
-							if (dist[secondLast][end] == -1)
-								continue;
-							else {
-								int pairDist = c.get(subtracted).get(secondLast);
-								if (pairDist != Integer.MAX_VALUE) {
-									int added = pairDist + dist[secondLast][end];
-									if (added < minDist) {
-										minDist = added;
+		for(int nIter = 0; nIter < nCase; nIter++) {
+			// make matrix from given inputs
+			int n = Integer.parseInt(bufferReader.readLine().trim());
+			
+			int[][] dist = new int[n][n];
+			for(int i=0; i < n; i++) {
+				String[] splited = bufferReader.readLine().trim().split(" ");
+				for(int j=0; j < n; j++)
+					dist[i][j] = Integer.parseInt(splited[j]);
+			}
+			
+			// init c 
+			HashMap<ArrayList<Integer>, HashMap<Integer, Integer>> c = new HashMap<ArrayList<Integer>, HashMap<Integer, Integer>>();
+			ArrayList<Integer> initS = new ArrayList<Integer>(){{add(0);}};
+			updateC(c, initS, 0);
+			for (int i = 1; i < n; i++) {
+				int[] arr = new int[n];
+				ArrayList<ArrayList<Integer>> subsets = new ArrayList<ArrayList<Integer>>();
+				getCombis(arr, 0, n, i, 1, i, subsets);
+				// for all subsets S of size i and containing 1
+				for(int j=0; j < subsets.size(); j++) {
+					ArrayList<Integer> s = subsets.get(j);
+					// c(s, 0) = inf
+					updateC(c, s, i);
+					// for all end included in subsets
+					for(int k=0; k < s.size(); k++) {
+						int end = s.get(k);
+						// end 0 not allowed
+						if (end == 0)
+							continue;
+						else {
+							ArrayList<Integer> subtracted = (ArrayList<Integer>) s.clone();
+							subtracted.remove(Integer.valueOf(end));
+							// get min dist for all second last
+							int minDist = Integer.MAX_VALUE;
+							for (int l=0; l < subtracted.size(); l++) {
+								int secondLast = subtracted.get(l);	
+								if (dist[secondLast][end] == -1)
+									continue;
+								else {
+									int pairDist = c.get(subtracted).get(secondLast);
+									if (pairDist != Integer.MAX_VALUE) {
+										int added = pairDist + dist[secondLast][end];
+										if (added < minDist) {
+											minDist = added;
+										}
 									}
 								}
 							}
+							c.get(s).put(end, minDist);
 						}
-						c.get(s).put(end, minDist);
 					}
 				}
+						
 			}
-					
+			int minDist = getMinDistfromStart(c, n, dist);
+			bufferedWriter.write(String.format("#%d %d", nIter+1, minDist));
+			bufferedWriter.newLine();
 		}
-		int minDist = getMinDistfromStart(c, n, dist);
-		System.out.println(minDist);
+		bufferReader.close();
+		bufferedWriter.close();
 	}
 	public static void getCombis(int[] arr, int index, int n, int r, int target, int origin_r, ArrayList<ArrayList<Integer>> subsets) { 
 		if (r == 0) {
