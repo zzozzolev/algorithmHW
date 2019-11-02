@@ -12,7 +12,7 @@ import java.io.FileNotFoundException;
 public class Runner {
 
 	public static void main(String[] args) throws NumberFormatException, IOException {
-		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/input.txt";
+		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/input2.txt";
 		FileReader fileReader = new FileReader(inputPath);
 		BufferedReader bufferReader = new BufferedReader(fileReader);
 		
@@ -29,8 +29,7 @@ public class Runner {
 		// init c 
 		HashMap<ArrayList<Integer>, HashMap<Integer, Integer>> c = new HashMap<ArrayList<Integer>, HashMap<Integer, Integer>>();
 		ArrayList<Integer> initS = new ArrayList<Integer>(){{add(0);}};
-		updateC(c, initS, 1);
-		
+		updateC(c, initS, 0);
 		for (int i = 1; i < n; i++) {
 			int[] arr = new int[n];
 			ArrayList<ArrayList<Integer>> subsets = new ArrayList<ArrayList<Integer>>();
@@ -40,7 +39,7 @@ public class Runner {
 				ArrayList<Integer> s = subsets.get(j);
 				if (!s.contains(0))
 					System.out.println(s+" not 0");
-				// c(s, 1) = inf
+				// c(s, 0) = inf
 				updateC(c, s, i);
 				// for all end included in subsets
 				for(int k=0; k < s.size(); k++) {
@@ -54,13 +53,17 @@ public class Runner {
 						// get min dist for all second last
 						int minDist = Integer.MAX_VALUE;
 						for (int l=0; l < subtracted.size(); l++) {
-							int secondLast = subtracted.get(l);
+							int secondLast = subtracted.get(l);	
 							if (dist[secondLast][end] == -1)
 								continue;
 							else {
 								int pairDist = c.get(subtracted).get(secondLast);
-								if (pairDist < minDist)
-									minDist = pairDist + dist[secondLast][end];
+								if (pairDist != Integer.MAX_VALUE) {
+									int added = pairDist + dist[secondLast][end];
+									if (added < minDist) {
+										minDist = added;
+									}
+								}
 							}
 						}
 						c.get(s).put(end, minDist);
@@ -92,9 +95,9 @@ public class Runner {
 	
 	public static void updateC(HashMap<ArrayList<Integer>, HashMap<Integer, Integer>> c, 
 							   ArrayList<Integer> s,
-							   int size){
+							   int idx){
 		int value = -1;
-		if (size == 1) 
+		if (idx == 0) 
 			value = 0;
 		else
 			value = Integer.MAX_VALUE;
@@ -113,10 +116,11 @@ public class Runner {
 			// j and start 1 not connected
 			if (dist[j][0] == -1)
 				continue;
-			int secondLastDist = c.get(all).get(j);
 			
-			if (secondLastDist < minDist)
-				minDist = secondLastDist + dist[j][0];
+			int secondLastDist = c.get(all).get(j);
+			int added = secondLastDist + dist[j][0];
+			if (added < minDist)
+				minDist = added;
 		}
 		
 		return minDist;
