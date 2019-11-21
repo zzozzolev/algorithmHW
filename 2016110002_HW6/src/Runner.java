@@ -1,71 +1,178 @@
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class Runner {
 
-	public static void main(String[] args) {
-		int n = 2;
-		int m = 3;
-		double[] objFuncCoeff = new double[n];
-		double[][] constCoeff = new double[m][n];
+	public static void main(String[] args) throws IOException {
+		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/input.txt";
+		FileReader fileReader = new FileReader(inputPath);
+		BufferedReader bufferReader = new BufferedReader(fileReader);
+		
+		String[] splited = bufferReader.readLine().trim().split(" ");
+		int n = Integer.parseInt(splited[0]);
+		int m = Integer.parseInt(splited[1]);
+		int nRow = m + 1; // constraint + object function
+		int nCol = n + 1; // variable + constant
+		
 		ArrayList<Double> objValue = new ArrayList<Double>();
+		double[][] constCoeff = getConstCoeff(nRow, nCol, bufferReader);
+
+		int objFuncRow = 0;
+		int constCol = 0;
 		
-		addNonNegativity(constCoeff);
-		
-		boolean isAllNeg = isObjFuncAllNeg(constCoeff[0]);
+		double[][] slackForm = getSlackForm(nRow, nCol, constCoeff);
+		boolean isAllNeg = isObjFuncAllNeg(constCol, slackForm[objFuncRow]);
 		boolean unbounded = false;
-		// 0: constant, 1: x_1, ...
-		double[][] slackForm = getSlackForm(constCoeff);
 		
-		while(!isAllNeg || unbounded) {
-			int maxCoeffIdx = getMaxCoeffIdx(slackForm[0]);
-			if (maxCoeffIdx == 0)
-				System.out.println("constant is maxCoeffIdx");
-			unbounded = isUnbounded(maxCoeffIdx, slackForm);
+		while(!isAllNeg || !unbounded) {
+			int maxCoeffCol = getMaxCoeffCol(constCol, nCol, slackForm[objFuncRow]);
+			unbounded = isUnbounded(maxCoeffCol, objFuncRow, slackForm);
 			
 			if (unbounded)
 				break;
 			
 			// (row, col) (const, coeff)
-			int tightConstIdx = getTightConstIdx(maxCoeffIdx, slackForm);
-			double[] rearranged = getRearranged(maxCoeffIdx, slackForm[tightConstIdx]);
+			int tightConstIdx = getTightConstRow(maxCoeffCol, objFuncRow, constCol, slackForm);
+			getRearranged(maxCoeffCol, nCol, slackForm[tightConstIdx]);
+			replace(tightConstIdx, maxCoeffCol, slackForm);
 			
-			replace(rearranged, slackForm);
-			
-			objValue.add(slackForm[0][0]);
+			objValue.add(slackForm[objFuncRow][constCol]);
+			isAllNeg = isObjFuncAllNeg(constCol, slackForm[objFuncRow]);
+		}
+		
+		System.out.println(objValue);
+	}
+	
+	public static double[][] getConstCoeff(int nRow, int nCol, BufferedReader bufferReader) throws IOException{
+		double[][] constCoeff = new double[nRow][nCol];
+		for(int i=0; i<nRow; i++) {
+			String[] splited = bufferReader.readLine().trim().split(" ");
+			// 2x + 3y + 4
+			for(int j=0; j<splited.length; j++) {
+				constCoeff[i][j] = Double.parseDouble(splited[j]);
+			}
+		}
+		return constCoeff;
+	}
+	
+	public static double[][] getSlackForm(int nRow, int nCol, double[][] constCoeff) {
+		// slack form: [constraint][n variable + constant + slack varibale] -> [m+1][n+1+m]
+		// ex) 4x + 3y <= 2 -> a = 2 - 4x - 3y
+		// array [4, 3, 2] -> [2, -4, -3, a, b] (a, b are other constraints slack variable)
+		double[][] slackForm = new double[nRow][nCol+nRow];
+		for(int i=0; i<nRow; i++) {
+			for(int j=0; j<nCol-1; j++) {
+				// coefficient
+				slackForm[i][j] = - constCoeff[i][j];
+			}
+			// constant
+			slackForm[i][0] = constCoeff[i][nCol-1];
+			// corresponding row slack variable set to - 1.0 (LHS) and others set to 0.0
+			slackForm[i][nCol+i] = - 1.0;
+		}
+		return slackForm;
+	}
+	
+	public static boolean isObjFuncAllNeg(int constCol, double[] objFunc) {
+		// do not consider constant -> index 0
+		boolean isAllNeg = true;
+		for(int i=constCol+1; i < objFunc.length; i++) {
+			if (objFunc[i] > 0) {
+				isAllNeg = false;
+				break;
+			}
+		}
+
+		return isAllNeg;
+	}
+	
+	public static int getMaxCoeffCol(int constCol, int nCol, double[] objFunc) {
+		double maxCoeff = Double.MIN_VALUE;
+		int maxCoeffCol = -1;
+		// exclude constant
+		for(int i = constCol+1; i < nCol; i++) {
+			if (objFunc[i] > maxCoeff)
+				maxCoeff = objFunc[i];
+				maxCoeffCol = i;
+		}
+		if (maxCoeffCol == -1)
+			System.out.println("invalid maxCoeffIdx");
+		
+		return maxCoeffCol;
+	}
+	
+	public static boolean isUnbounded(int maxCoeffCol, int objFuncRow, double[][] slackForm) {
+		boolean isPositive = false;
+		for(int i=0; i<slackForm.length; i++) {
+			double target = 0.0;
+			if (i == objFuncRow)
+				target = - slackForm[i][maxCoeffCol];
+			else
+				target = slackForm[i][maxCoeffCol];
+			if (target > 0) {
+				isPositive = true;
+				break;
+			}
+		}
+		
+		return (isPositive? false : true);
+	}
+	
+	public static int getTightConstRow(int maxCoeffCol, 
+									   int objFuncRow, 
+									   int constCol,
+									   double[][] slackForm) {
+		double tightValue = Double.MAX_VALUE;
+		int tightRow = -1;
+		for(int i = objFuncRow+1; i < slackForm.length; i++) {
+			// only consider negative coeff
+			if (slackForm[i][maxCoeffCol] >= 0)
+				continue;
+			else {
+				double value = slackForm[i][0] / slackForm[i][maxCoeffCol];
+				if (value < tightValue) {
+					tightValue = value;
+					tightRow = i;
+				}
+			}
+		}
+		return tightRow;
+	}
+	
+	public static void getRearranged(int maxCoeffCol, int nCol, double[] constraint) {
+		// max coeff -> 0, other -> (coeff / max coeff)
+		double divider = constraint[maxCoeffCol];
+		for(int i = 0; i < nCol; i++) {
+			if (i == maxCoeffCol) {
+				// move i to LHS
+				constraint[i] = -1.0;
+			}
+			else {
+				constraint[i] /= divider;
+			}
 		}
 	}
 	
-	public static void addNonNegativity(double[][] constCoeff) {
-	 
-	}
-	
-	public static boolean isObjFuncAllNeg(double[] objFunc) {
-		// TODO: do not consider constant
-	}
-	
-	public static double[][] getSlackForm(double[][] constCoeff) {
-		// slack form: [constraint + non-negativity][n variable + constant]
-		// [m+n][n+1]
-	}
-	
-	public static int getMaxCoeffIdx(double[] objFuncCoeff) {
-		// TODO: do not consider constant
-	}
-	
-	public static boolean isUnbounded(int maxCoeffIdx, double[][] slackForm) {
+	public static void replace(int tightConstIdx, 
+							   int maxCoeffCol,
+							   double[][] slackForm) {
 		
-	}
-	
-	public static int getTightConstIdx(int maxCoeffIdx, double[][] slackForm) {
-		
-	}
-	
-	public static double[] getRearranged(int maxCoeffIdx, double[] constraint) {
-		// TODO: max coeff == 0
-	}
-	
-	public static void replace(double[] rearranged, double[][] slackForm) {
-		
+		double[] rearranged = slackForm[tightConstIdx];
+		for(int i = 0; i < slackForm.length; i++) {
+			// do not consider tight constraint (rearranged)
+			if (i == tightConstIdx) {
+				continue;
+			}
+			else {
+				double multipleValue = slackForm[i][maxCoeffCol];
+				for(int j=0; j<slackForm[i].length; j++){
+					slackForm[i][j] += multipleValue * rearranged[j];
+				}
+			}
+		}
 	}
 	
 }
