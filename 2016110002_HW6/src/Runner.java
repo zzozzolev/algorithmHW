@@ -21,6 +21,8 @@ public class Runner {
 		ArrayList<Double> objValue = new ArrayList<Double>();
 		double[][] constCoeff = getConstCoeff(nRow, nCol, bufferReader);
 		
+		// first objFunc only consists of coefficients 
+		objValue.add(0.0);
 		int objFuncRow = 0;
 		int constCol = 0;
 		
