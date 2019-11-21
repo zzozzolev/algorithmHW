@@ -30,7 +30,7 @@ public class Runner {
 		boolean isAllNeg = isObjFuncAllNeg(constCol, nCol, slackForm[objFuncRow]);
 		boolean unbounded = false;
 		
-		while(!isAllNeg || !unbounded) {
+		while(!isAllNeg) {
 			int maxCoeffCol = getMaxCoeffCol(constCol, nCol, slackForm[objFuncRow]);
 			unbounded = isUnbounded(maxCoeffCol, slackForm);
 			
