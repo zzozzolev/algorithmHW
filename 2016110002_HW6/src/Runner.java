@@ -24,8 +24,8 @@ public class Runner {
 		int objFuncRow = 0;
 		int constCol = 0;
 		
-		double[][] slackForm = getSlackForm(nRow, nCol, constCoeff);
-		boolean isAllNeg = isObjFuncAllNeg(constCol, slackForm[objFuncRow]);
+		double[][] slackForm = getSlackForm(nRow, nCol, objFuncRow, constCoeff);
+		boolean isAllNeg = isObjFuncAllNeg(constCol, nCol, slackForm[objFuncRow]);
 		boolean unbounded = false;
 		
 		while(!isAllNeg || !unbounded) {
@@ -41,7 +41,7 @@ public class Runner {
 			replace(tightConstIdx, maxCoeffCol, slackForm);
 			
 			objValue.add(slackForm[objFuncRow][constCol]);
-			isAllNeg = isObjFuncAllNeg(constCol, slackForm[objFuncRow]);
+			isAllNeg = isObjFuncAllNeg(constCol, nCol, slackForm[objFuncRow]);
 		}
 		
 		System.out.println(objValue);
@@ -55,12 +55,11 @@ public class Runner {
 			for(int j=0; j<splited.length; j++) {
 				constCoeff[i][j] = Double.parseDouble(splited[j]);
 			}
-			System.out.println(Arrays.toString(constCoeff[i]));
 		}
 		return constCoeff;
 	}
 	
-	public static double[][] getSlackForm(int nRow, int nCol, double[][] constCoeff) {
+	public static double[][] getSlackForm(int nRow, int nCol, int objFuncRow, double[][] constCoeff) {
 		// slack form: [constraint][n variable + constant + slack varibale] -> [m+1][n+1+m]
 		// ex) 4x + 3y <= 2 -> a = 2 - 4x - 3y
 		// array [4, 3, 2] -> [2, -4, -3, -1, 0, 0] (0 are other constraints slack variable)
@@ -68,28 +67,28 @@ public class Runner {
 		for(int i=0; i<nRow; i++) {
 			for(int j=1; j<nCol; j++) {
 				// coefficient
-				slackForm[i][j] = - constCoeff[i][j-1];
+				if(i == objFuncRow)
+					slackForm[i][j] = constCoeff[i][j-1];
+				else	
+					slackForm[i][j] = - constCoeff[i][j-1];
 			}
 			// constant
 			slackForm[i][0] = constCoeff[i][nCol-1];
 			// corresponding row slack variable set to - 1.0 (LHS) and others set to 0.0
 			slackForm[i][nCol+i] = - 1.0;
-			System.out.println(Arrays.toString(slackForm[i]));
 		}
-		System.exit(1);
 		return slackForm;
 	}
 	
-	public static boolean isObjFuncAllNeg(int constCol, double[] objFunc) {
+	public static boolean isObjFuncAllNeg(int constCol, int nCol, double[] objFunc) {
 		// do not consider constant -> index 0
 		boolean isAllNeg = true;
-		for(int i=constCol+1; i < objFunc.length; i++) {
+		for(int i=constCol+1; i < nCol; i++) {
 			if (objFunc[i] > 0) {
 				isAllNeg = false;
 				break;
 			}
 		}
-
 		return isAllNeg;
 	}
 	
