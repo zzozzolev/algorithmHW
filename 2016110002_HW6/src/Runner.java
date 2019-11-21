@@ -30,7 +30,7 @@ public class Runner {
 		
 		while(!isAllNeg || !unbounded) {
 			int maxCoeffCol = getMaxCoeffCol(constCol, nCol, slackForm[objFuncRow]);
-			unbounded = isUnbounded(maxCoeffCol, objFuncRow, slackForm);
+			unbounded = isUnbounded(maxCoeffCol, slackForm);
 			
 			if (unbounded)
 				break;
@@ -107,20 +107,18 @@ public class Runner {
 		return maxCoeffCol;
 	}
 	
-	public static boolean isUnbounded(int maxCoeffCol, int objFuncRow, double[][] slackForm) {
+	public static boolean isUnbounded(int maxCoeffCol, double[][] slackForm) {
 		boolean isPositive = false;
 		for(int i=0; i<slackForm.length; i++) {
-			double target = 0.0;
-			if (i == objFuncRow)
-				target = - slackForm[i][maxCoeffCol];
-			else
-				target = slackForm[i][maxCoeffCol];
+			// constCoeff == slackForm in objFuncRow
+			// constCoeff == - slackForm in otherRow
+			// so all of them need to be multiplied -1
+			double target = - slackForm[i][maxCoeffCol];
 			if (target > 0) {
 				isPositive = true;
 				break;
 			}
 		}
-		
 		return (isPositive? false : true);
 	}
 	
