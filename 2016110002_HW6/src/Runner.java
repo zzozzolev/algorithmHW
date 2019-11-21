@@ -99,9 +99,10 @@ public class Runner {
 		int maxCoeffCol = -1;
 		// exclude constant
 		for(int i = constCol+1; i < nCol; i++) {
-			if (objFunc[i] > maxCoeff)
+			if (objFunc[i] > maxCoeff) {
 				maxCoeff = objFunc[i];
 				maxCoeffCol = i;
+			}
 		}
 		if (maxCoeffCol == -1)
 			System.out.println("invalid maxCoeffIdx");
