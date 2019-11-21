@@ -37,7 +37,7 @@ public class Runner {
 			
 			// (row, col) (const, coeff)
 			int tightConstIdx = getTightConstRow(maxCoeffCol, objFuncRow, constCol, slackForm);
-			getRearranged(maxCoeffCol, nCol, slackForm[tightConstIdx]);
+			double[] rearranged = getRearranged(maxCoeffCol, nCol, slackForm[tightConstIdx]);
 			replace(tightConstIdx, maxCoeffCol, slackForm);
 			
 			objValue.add(slackForm[objFuncRow][constCol]);
@@ -133,7 +133,7 @@ public class Runner {
 			if (slackForm[i][maxCoeffCol] >= 0)
 				continue;
 			else {
-				double value = slackForm[i][0] / slackForm[i][maxCoeffCol];
+				double value = - slackForm[i][0] / slackForm[i][maxCoeffCol];
 				if (value < tightValue) {
 					tightValue = value;
 					tightRow = i;
@@ -143,18 +143,31 @@ public class Runner {
 		return tightRow;
 	}
 	
-	public static void getRearranged(int maxCoeffCol, int nCol, double[] constraint) {
-		// max coeff -> 0, other -> (coeff / max coeff)
-		double divider = constraint[maxCoeffCol];
-		for(int i = 0; i < nCol; i++) {
+	public static double[] getRearranged(int maxCoeffCol, int nCol, double[] constraint) {
+		// multiply -1 to move to LHS
+		double[] rearranged = new double[constraint.length];
+		double divider = - constraint[maxCoeffCol];
+		
+		for(int i = 0; i < constraint.length; i++) {
 			if (i == maxCoeffCol) {
 				// move i to LHS
 				constraint[i] = -1.0;
+				// set to 0.0 not to be multiplied other coeff
+				rearranged[i] = 0.0;
+			}
+			else if(i < nCol) {
+				// coeff / - max coeff
+				constraint[i] /= divider;
+				rearranged[i] = constraint[i];
 			}
 			else {
-				constraint[i] /= divider;
+				// slack variable: coeff / - max coeff and move to RHS
+				constraint[i] /= - divider;
+				rearranged[i] = constraint[i];
 			}
 		}
+		
+		return rearranged;
 	}
 	
 	public static void replace(int tightConstIdx, 
