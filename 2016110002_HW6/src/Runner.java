@@ -3,6 +3,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Runner {
 
@@ -19,7 +20,7 @@ public class Runner {
 		
 		ArrayList<Double> objValue = new ArrayList<Double>();
 		double[][] constCoeff = getConstCoeff(nRow, nCol, bufferReader);
-
+		
 		int objFuncRow = 0;
 		int constCol = 0;
 		
@@ -54,6 +55,7 @@ public class Runner {
 			for(int j=0; j<splited.length; j++) {
 				constCoeff[i][j] = Double.parseDouble(splited[j]);
 			}
+			System.out.println(Arrays.toString(constCoeff[i]));
 		}
 		return constCoeff;
 	}
@@ -61,18 +63,20 @@ public class Runner {
 	public static double[][] getSlackForm(int nRow, int nCol, double[][] constCoeff) {
 		// slack form: [constraint][n variable + constant + slack varibale] -> [m+1][n+1+m]
 		// ex) 4x + 3y <= 2 -> a = 2 - 4x - 3y
-		// array [4, 3, 2] -> [2, -4, -3, a, b] (a, b are other constraints slack variable)
+		// array [4, 3, 2] -> [2, -4, -3, -1, 0, 0] (0 are other constraints slack variable)
 		double[][] slackForm = new double[nRow][nCol+nRow];
 		for(int i=0; i<nRow; i++) {
-			for(int j=0; j<nCol-1; j++) {
+			for(int j=1; j<nCol; j++) {
 				// coefficient
-				slackForm[i][j] = - constCoeff[i][j];
+				slackForm[i][j] = - constCoeff[i][j-1];
 			}
 			// constant
 			slackForm[i][0] = constCoeff[i][nCol-1];
 			// corresponding row slack variable set to - 1.0 (LHS) and others set to 0.0
 			slackForm[i][nCol+i] = - 1.0;
+			System.out.println(Arrays.toString(slackForm[i]));
 		}
+		System.exit(1);
 		return slackForm;
 	}
 	
