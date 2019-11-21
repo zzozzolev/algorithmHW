@@ -38,7 +38,7 @@ public class Runner {
 			// (row, col) (const, coeff)
 			int tightConstIdx = getTightConstRow(maxCoeffCol, objFuncRow, constCol, slackForm);
 			double[] rearranged = getRearranged(maxCoeffCol, nCol, slackForm[tightConstIdx]);
-			replace(tightConstIdx, maxCoeffCol, slackForm);
+			replace(tightConstIdx, maxCoeffCol, rearranged, slackForm);
 			
 			objValue.add(slackForm[objFuncRow][constCol]);
 			isAllNeg = isObjFuncAllNeg(constCol, nCol, slackForm[objFuncRow]);
@@ -172,9 +172,8 @@ public class Runner {
 	
 	public static void replace(int tightConstIdx, 
 							   int maxCoeffCol,
+							   double[] rearranged,
 							   double[][] slackForm) {
-		
-		double[] rearranged = slackForm[tightConstIdx];
 		for(int i = 0; i < slackForm.length; i++) {
 			// do not consider tight constraint (rearranged)
 			if (i == tightConstIdx) {
