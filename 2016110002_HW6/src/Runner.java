@@ -180,6 +180,7 @@ public class Runner {
 			}
 			else {
 				double multipleValue = slackForm[i][maxCoeffCol];
+				slackForm[i][maxCoeffCol] = 0.0;
 				for(int j=0; j<slackForm[i].length; j++){
 					slackForm[i][j] += multipleValue * rearranged[j];
 				}
