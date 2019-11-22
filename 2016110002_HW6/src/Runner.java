@@ -34,8 +34,10 @@ public class Runner {
 			int maxCoeffCol = getMaxCoeffCol(constCol, nCol, slackForm[objFuncRow]);
 			unbounded = isUnbounded(maxCoeffCol, slackForm);
 			
-			if (unbounded)
+			if (unbounded) {
+				objValue.remove(0);
 				break;
+			}
 			
 			// (row, col) (const, coeff)
 			int tightConstIdx = getTightConstRow(maxCoeffCol, objFuncRow, constCol, slackForm);
@@ -44,9 +46,12 @@ public class Runner {
 			
 			objValue.add(slackForm[objFuncRow][constCol]);
 			isAllNeg = isObjFuncAllNeg(constCol, nCol, slackForm[objFuncRow]);
-		}
+		} 
 		
-		System.out.println(objValue);
+		if (!unbounded)
+			System.out.println(objValue);
+		else
+			System.out.println("unbounded");
 	}
 	
 	public static double[][] getConstCoeff(int nRow, int nCol, BufferedReader bufferReader) throws IOException{
