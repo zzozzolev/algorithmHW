@@ -158,14 +158,10 @@ public class Runner {
 				// set to 0.0 not to be multiplied other coeff
 				rearranged[i] = 0.0;
 			}
-			else if(i < nCol) {
-				// coeff / - max coeff
-				constraint[i] /= divider;
-				rearranged[i] = constraint[i];
-			}
 			else {
-				// slack variable: coeff / - max coeff and move to RHS
-				constraint[i] /= - divider;
+				// coeff / - max coeff
+				// slack variable already in RHS
+				constraint[i] /= divider;
 				rearranged[i] = constraint[i];
 			}
 		}
