@@ -1,6 +1,9 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,50 +11,56 @@ import java.util.Arrays;
 public class Runner {
 
 	public static void main(String[] args) throws IOException {
-		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/input.txt";
+		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/hw6_input2.txt";
 		FileReader fileReader = new FileReader(inputPath);
 		BufferedReader bufferReader = new BufferedReader(fileReader);
 		
-		String[] splited = bufferReader.readLine().trim().split(" ");
-		int n = Integer.parseInt(splited[0]);
-		int m = Integer.parseInt(splited[1]);
-		int nRow = m + 1; // constraint + object function
-		int nCol = n + 1; // variable + constant
+		String outputPath = "/Users/poza/jam/2019_2/algorithm_analysis/2016110002.txt";
+		File file = new File(outputPath);
+		BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
 		
-		ArrayList<Double> objValue = new ArrayList<Double>();
-		double[][] constCoeff = getConstCoeff(nRow, nCol, bufferReader);
+		int nCase = Integer.parseInt(bufferReader.readLine().trim());
 		
-		// first objFunc only consists of coefficients 
-		objValue.add(0.0);
-		int objFuncRow = 0;
-		int constCol = 0;
-		
-		double[][] slackForm = getSlackForm(nRow, nCol, objFuncRow, constCoeff);
-		boolean isAllNeg = isObjFuncAllNeg(constCol, nCol, slackForm[objFuncRow]);
-		boolean unbounded = false;
-		
-		while(!isAllNeg) {
-			int maxCoeffCol = getMaxCoeffCol(constCol, nCol, slackForm[objFuncRow]);
-			unbounded = isUnbounded(maxCoeffCol, slackForm);
+		for(int num = 1; num <= nCase; num++) {
+			String[] splited = bufferReader.readLine().trim().split(" ");
+			int n = Integer.parseInt(splited[0]);
+			int m = Integer.parseInt(splited[1]);
+			int nRow = m + 1; // constraint + object function
+			int nCol = n + 1; // variable + constant
 			
-			if (unbounded) {
-				objValue.remove(0);
-				break;
-			}
+			ArrayList<Double> objValue = new ArrayList<Double>();
+			double[][] constCoeff = getConstCoeff(nRow, nCol, bufferReader);
 			
-			// (row, col) (const, coeff)
-			int tightConstIdx = getTightConstRow(maxCoeffCol, objFuncRow, constCol, slackForm);
-			double[] rearranged = getRearranged(maxCoeffCol, nCol, slackForm[tightConstIdx]);
-			replace(tightConstIdx, maxCoeffCol, rearranged, slackForm);
+			// first objFunc only consists of coefficients 
+			objValue.add(0.0);
+			int objFuncRow = 0;
+			int constCol = 0;
 			
-			objValue.add(slackForm[objFuncRow][constCol]);
-			isAllNeg = isObjFuncAllNeg(constCol, nCol, slackForm[objFuncRow]);
-		} 
-		
-		if (!unbounded)
-			System.out.println(objValue);
-		else
-			System.out.println("unbounded");
+			double[][] slackForm = getSlackForm(nRow, nCol, objFuncRow, constCoeff);
+			boolean isAllNeg = isObjFuncAllNeg(constCol, nCol, slackForm[objFuncRow]);
+			boolean unbounded = false;
+			
+			while(!isAllNeg) {
+				int maxCoeffCol = getMaxCoeffCol(constCol, nCol, slackForm[objFuncRow]);
+				unbounded = isUnbounded(maxCoeffCol, slackForm);
+				
+				if (unbounded) {
+					objValue.clear();
+					break;
+				}
+				
+				// (row, col) (const, coeff)
+				int tightConstIdx = getTightConstRow(maxCoeffCol, objFuncRow, constCol, slackForm);
+				double[] rearranged = getRearranged(maxCoeffCol, nCol, slackForm[tightConstIdx]);
+				replace(tightConstIdx, maxCoeffCol, rearranged, slackForm);
+				
+				objValue.add(slackForm[objFuncRow][constCol]);
+				isAllNeg = isObjFuncAllNeg(constCol, nCol, slackForm[objFuncRow]);
+			} 
+			writeOutput(objValue, unbounded, bufferedWriter, num);
+		}
+		bufferReader.close();
+		bufferedWriter.close();
 	}
 	
 	public static double[][] getConstCoeff(int nRow, int nCol, BufferedReader bufferReader) throws IOException{
@@ -193,4 +202,32 @@ public class Runner {
 		}
 	}
 	
+	public static void writeOutput(ArrayList<Double> objValue, 
+								   boolean unbounded,
+								   BufferedWriter bufferedWriter,
+								   int num) throws IOException {
+		bufferedWriter.write(String.format("#%d ", num));
+		
+		if (unbounded) {
+			bufferedWriter.write("unbounded");
+			bufferedWriter.newLine();
+		}
+		else {	
+			for(int i=0; i<objValue.size(); i++){
+				double value = objValue.get(i);
+				// integer
+				if (value % 1.0 == 0.0) {
+					bufferedWriter.write(String.format("%d", (int)(value)));
+				}
+				// double
+				else
+					bufferedWriter.write(String.format("%.2f", Math.round(value * 100) / 100.0));
+				if (i < objValue.size() - 1)
+					bufferedWriter.write(" ");
+				// last
+				else
+					bufferedWriter.newLine();
+			}
+		}
+	}
 }
