@@ -11,11 +11,11 @@ import java.util.Arrays;
 public class Runner {
 
 	public static void main(String[] args) throws IOException {
-		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/hw6_input2.txt";
+		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/hw6_invalid_input.txt";
 		FileReader fileReader = new FileReader(inputPath);
 		BufferedReader bufferReader = new BufferedReader(fileReader);
 		
-		String outputPath = "/Users/poza/jam/2019_2/algorithm_analysis/2016110002.txt";
+		String outputPath = "/Users/poza/jam/2019_2/algorithm_analysis/invalid_output.txt";
 		File file = new File(outputPath);
 		BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
 		
@@ -36,7 +36,7 @@ public class Runner {
 			int objFuncRow = 0;
 			int constCol = 0;
 			
-			double[][] slackForm = getSlackForm(nRow, nCol, objFuncRow, constCoeff);
+			double[][] slackForm = getSlackForm(nRow, m, nCol, objFuncRow, constCoeff);
 			boolean isAllNeg = isObjFuncAllNeg(constCol, nCol, slackForm[objFuncRow]);
 			boolean unbounded = false;
 			
@@ -54,6 +54,7 @@ public class Runner {
 				double[] rearranged = getRearranged(maxCoeffCol, nCol, slackForm[tightConstIdx]);
 				replace(tightConstIdx, maxCoeffCol, rearranged, slackForm);
 				
+				print2d(slackForm);
 				objValue.add(slackForm[objFuncRow][constCol]);
 				isAllNeg = isObjFuncAllNeg(constCol, nCol, slackForm[objFuncRow]);
 			} 
@@ -61,6 +62,13 @@ public class Runner {
 		}
 		bufferReader.close();
 		bufferedWriter.close();
+	}
+	
+	public static void print2d(double[][] a) {
+		for(int i=0; i<a.length; i++) {
+			System.out.println(Arrays.toString(a[i]));
+		}
+		System.out.println();
 	}
 	
 	public static double[][] getConstCoeff(int nRow, int nCol, BufferedReader bufferReader) throws IOException{
@@ -75,11 +83,11 @@ public class Runner {
 		return constCoeff;
 	}
 	
-	public static double[][] getSlackForm(int nRow, int nCol, int objFuncRow, double[][] constCoeff) {
+	public static double[][] getSlackForm(int nRow, int m, int nCol, int objFuncRow, double[][] constCoeff) {
 		// slack form: [constraint][n variable + constant + slack varibale] -> [m+1][n+1+m]
 		// ex) 4x + 3y <= 2 -> a = 2 - 4x - 3y
 		// array [4, 3, 2] -> [2, -4, -3, -1, 0, 0] (0 are other constraints slack variable)
-		double[][] slackForm = new double[nRow][nCol+nRow];
+		double[][] slackForm = new double[nRow][nCol+m];
 		for(int i=0; i<nRow; i++) {
 			for(int j=1; j<nCol; j++) {
 				// coefficient
@@ -90,8 +98,12 @@ public class Runner {
 			}
 			// constant
 			slackForm[i][0] = constCoeff[i][nCol-1];
+			// not to set slack variable for object function row 
+			if (i == objFuncRow)
+				continue;
 			// corresponding row slack variable set to - 1.0 (LHS) and others set to 0.0
-			slackForm[i][nCol+i] = - 1.0;
+			else
+				slackForm[i][nCol+i-1] = - 1.0;
 		}
 		return slackForm;
 	}
