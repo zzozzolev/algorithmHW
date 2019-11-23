@@ -11,11 +11,11 @@ import java.util.Arrays;
 public class Runner {
 
 	public static void main(String[] args) throws IOException {
-		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/hw6_invalid_input.txt";
+		String inputPath = "/Users/poza/jam/2019_2/algorithm_analysis/hw6_input2.txt";
 		FileReader fileReader = new FileReader(inputPath);
 		BufferedReader bufferReader = new BufferedReader(fileReader);
 		
-		String outputPath = "/Users/poza/jam/2019_2/algorithm_analysis/invalid_output.txt";
+		String outputPath = "/Users/poza/jam/2019_2/algorithm_analysis/2016110002.txt";
 		File file = new File(outputPath);
 		BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
 		
@@ -37,11 +37,11 @@ public class Runner {
 			int constCol = 0;
 			
 			double[][] slackForm = getSlackForm(nRow, m, nCol, objFuncRow, constCoeff);
-			boolean isAllNeg = isObjFuncAllNeg(constCol, nCol, slackForm[objFuncRow]);
+			boolean isAllNeg = isObjFuncAllNeg(constCol, slackForm[objFuncRow]);
 			boolean unbounded = false;
 			
 			while(!isAllNeg) {
-				int maxCoeffCol = getMaxCoeffCol(constCol, nCol, slackForm[objFuncRow]);
+				int maxCoeffCol = getMaxCoeffCol(constCol, slackForm[objFuncRow]);
 				unbounded = isUnbounded(maxCoeffCol, slackForm);
 				
 				if (unbounded) {
@@ -54,9 +54,8 @@ public class Runner {
 				double[] rearranged = getRearranged(maxCoeffCol, nCol, slackForm[tightConstIdx]);
 				replace(tightConstIdx, maxCoeffCol, rearranged, slackForm);
 				
-				print2d(slackForm);
 				objValue.add(slackForm[objFuncRow][constCol]);
-				isAllNeg = isObjFuncAllNeg(constCol, nCol, slackForm[objFuncRow]);
+				isAllNeg = isObjFuncAllNeg(constCol, slackForm[objFuncRow]);
 			} 
 			writeOutput(objValue, unbounded, bufferedWriter, num);
 		}
@@ -108,10 +107,10 @@ public class Runner {
 		return slackForm;
 	}
 	
-	public static boolean isObjFuncAllNeg(int constCol, int nCol, double[] objFunc) {
+	public static boolean isObjFuncAllNeg(int constCol, double[] objFunc) {
 		// do not consider constant -> index 0
 		boolean isAllNeg = true;
-		for(int i=constCol+1; i < nCol; i++) {
+		for(int i=constCol+1; i < objFunc.length; i++) {
 			if (objFunc[i] > 0) {
 				isAllNeg = false;
 				break;
@@ -120,11 +119,11 @@ public class Runner {
 		return isAllNeg;
 	}
 	
-	public static int getMaxCoeffCol(int constCol, int nCol, double[] objFunc) {
+	public static int getMaxCoeffCol(int constCol, double[] objFunc) {
 		double maxCoeff = Double.MIN_VALUE;
 		int maxCoeffCol = -1;
 		// exclude constant
-		for(int i = constCol+1; i < nCol; i++) {
+		for(int i = constCol+1; i < objFunc.length; i++) {
 			if (objFunc[i] > maxCoeff) {
 				maxCoeff = objFunc[i];
 				maxCoeffCol = i;
