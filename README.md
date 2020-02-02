@@ -36,6 +36,21 @@
 
 ## HW5
 - Symmetric Traveling Salesman 문제를 해결하는 DP로 최적 싸이클을 찾는 자바 프로그램을 작성
+- 접근법
+  1. distance graph 초기화.
+  2. subset S를 넣었을 때 j의 min dist를 반환하는 `HashMap c` 정의
+  3. 출발점에서 출발점으로 도착하는 거리 0으로 초기화
+  4. size를 2부터 도시 개수(n)까지 증가시키면서 subset을 뽑음.
+  5. 출발점으로 되돌아가는 거리는 inf로 값 설정.
+  6. subset마다 모든 second last의 min dist를 구함.
+  7. second last의 min dist에 second last와 last의 거리를 더해 subset에 해당하는 min dist를 구함. (DP)
+  8. n까지 5~7 과정을 반복해 최적 싸이클을 찾음.
+ 
 
 ## HW6
 - Linear Programming 문제를 해결하기 위한 Simplex 알고리즘을 자바 프로그램으로 구현
+- 접근법
+  1. 항 개수 `n`, variable 개수 `m`을 인풋으로 받음.
+  2. 계수의 값을 2차원 배열에 담음.
+  3. obj value의 맨 처음 값으로 0.0 추가 (obj value는 모든 식에 0을 대입했을 때의 값)
+  4. 표현식에 대한 slack form을 얻음. ex) `4x + 3y <= 2 -> a = 2 - 4x - 3y`
